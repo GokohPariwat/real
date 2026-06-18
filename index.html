@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบ รับ - ส่ง หีบเลือกตั้ง สำนักงานเขตพญาไท</title>
+    <title>ระบบ รับ - ส่ง หีบเลือกตั้งสมาชิกสภากรุงเทพมหานคร และผู้ว่าราชการกรุงเทพมหานคร สำนักงานเขตพญาไท</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,7 @@
     <header class="bg-white shadow-sm z-10 border-b border-gray-200 shrink-0 px-3 py-2 md:py-3">
         <div class="w-full max-w-[1920px] mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <img 
-                src="logo สำนักงานเขตพญาไท.jpg" 
+                src="Logo.png" 
                 alt="Logo" 
                 class="h-16 md:h-20 w-auto object-contain drop-shadow-sm shrink-0" 
                 onerror="this.onerror=null; this.style.display='none'; document.getElementById('fallback-logo').classList.remove('hidden');"
@@ -40,7 +40,7 @@
             
             <div class="flex flex-col gap-1.5 w-full">
                 <h1 class="text-xl md:text-2xl font-bold text-gray-800 leading-tight">
-                    ระบบ รับ - ส่ง หีบเลือกตั้ง สำนักงานเขตพญาไท
+                    ระบบ รับ - ส่ง หีบเลือกตั้งสมาชิกสภากรุงเทพมหานคร และผู้ว่าราชการกรุงเทพมหานคร สำนักงานเขตพญาไท
                 </h1>
                 
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-1">
@@ -207,6 +207,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // ลิงก์ใหม่ล่าสุด
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxBwZqVR4QwXGg7CzouGXVrSd-AfI9Vfd3tAK_keYe5NQ_dsIOenc2LwFbJ14FtNyN/exec';
         const appId = window.__app_id || 'default-app';
 
@@ -409,7 +410,6 @@
                     deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'units', docId)).catch(console.error);
                 }
             } else {
-                // เติม น. สำหรับเวลาที่กดอัปเดตสถานะ
                 const d = new Date();
                 const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
                 
@@ -434,7 +434,6 @@
         const updateStatus = async (district, id, status, prevStatus = null) => {
             const docId = `${district}-${id}`;
             
-            // เติม น. สำหรับเวลาที่กดอัปเดตสถานะ
             const d = new Date();
             const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
             
@@ -457,7 +456,6 @@
             }).catch(console.error);
         };
 
-        // --- ฟังก์ชันรีเซ็ตข้อมูลเข้า Google Sheet ---
         window.handleReset = async () => {
             window.hideModal('reset');
             appState.unitsData = {};
