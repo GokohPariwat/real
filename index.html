@@ -207,11 +207,9 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // --- ลิงก์ Google Apps Script ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw-s92u7pejwnuUhVYQ28xmfqMSZIjSM6cLT1CD4RQTvlxJIo19ksRzlT-HlDCN9rkl/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxBwZqVR4QwXGg7CzouGXVrSd-AfI9Vfd3tAK_keYe5NQ_dsIOenc2LwFbJ14FtNyN/exec';
         const appId = window.__app_id || 'default-app';
 
-        // --- State ---
         let appState = {
             unitsData: {},
             userRole: 'viewer', 
@@ -258,12 +256,12 @@
                 const data = await response.json();
                 
                 if (data && typeof data === 'object') {
-                    // กรองข้อมูล: ดึงเฉพาะ ชั่วโมง:นาที (ตัดวินาทีและวันที่ทิ้ง)
                     for (const key in data) {
                         if (data[key].timestamp) {
+                            // ดึงเฉพาะ ชั่วโมง:นาที และเติม " น." ต่อท้าย
                             const timeMatch = String(data[key].timestamp).match(/\d{1,2}:\d{2}/);
                             if (timeMatch) {
-                                data[key].timestamp = timeMatch[0];
+                                data[key].timestamp = timeMatch[0] + ' น.';
                             }
                         }
                     }
@@ -411,9 +409,9 @@
                     deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'units', docId)).catch(console.error);
                 }
             } else {
-                // เก็บเวลาแค่ ชั่วโมง:นาที (HH:MM)
+                // เติม น. สำหรับเวลาที่กดอัปเดตสถานะ
                 const d = new Date();
-                const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
                 
                 const newData = { id, district, status: 'yellow', timestamp: timeStr, byRole: 'admin_yellow' };
                 appState.unitsData[docId] = newData;
@@ -436,9 +434,9 @@
         const updateStatus = async (district, id, status, prevStatus = null) => {
             const docId = `${district}-${id}`;
             
-            // เก็บเวลาแค่ ชั่วโมง:นาที (HH:MM)
+            // เติม น. สำหรับเวลาที่กดอัปเดตสถานะ
             const d = new Date();
-            const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} น.`;
             
             const newData = { id, district, status, timestamp: timeStr, byRole: appState.userRole };
             if (status === 'completed' && prevStatus) newData.previousStatus = prevStatus;
@@ -459,14 +457,13 @@
             }).catch(console.error);
         };
 
-        // --- เพิ่มฟังก์ชันรีเซ็ตข้อมูลเข้า Google Sheet ---
+        // --- ฟังก์ชันรีเซ็ตข้อมูลเข้า Google Sheet ---
         window.handleReset = async () => {
             window.hideModal('reset');
             appState.unitsData = {};
             renderApp();
             localStorage.removeItem('election_offline_data');
 
-            // 1. ส่งคำสั่งรีเซ็ตไปที่ Google Sheet
             fetch(SCRIPT_URL, {
                 method: 'POST', 
                 mode: 'no-cors',
@@ -474,7 +471,6 @@
                 body: JSON.stringify({ action: 'reset' })
             }).catch(console.error);
 
-            // 2. ถ้าใช้ Firebase อยู่ก็ลบข้อมูลใน Firebase ด้วย
             if (appState.isOnline && db) {
                 try {
                     const unitsRef = collection(db, 'artifacts', appId, 'public', 'data', 'units');
@@ -586,7 +582,6 @@
                 let contentHtml = '';
                 if (isCompleted || isYellow) {
                     const icon = isCompleted ? 'check-circle' : 'alert-circle';
-                    
                     let displayTime = data.timestamp || '';
                     
                     contentHtml = `
@@ -621,18 +616,15 @@
             container.innerHTML = html;
         }
 
-        // --- นาฬิกาหลักมุมบนซ้าย (มีวินาทีตามปกติ) ---
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock-display').textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }, 1000);
 
-        // --- Auto Refresh Data Every 10 Seconds ---
         setInterval(() => {
             window.fetchFromSheet(true);
         }, 10000);
 
-        // --- Boot ---
         initAuthAndData();
         lucide.createIcons();
 
