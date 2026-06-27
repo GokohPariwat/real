@@ -604,9 +604,14 @@
         }
 
         setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock-display').textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }, 1000);
+    const now = new Date();
+    document.getElementById('clock-display').textContent = now.toLocaleTimeString('th-TH', { 
+        timeZone: 'Asia/Bangkok', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+}, 1000);
 
         // ดึงข้อมูลใหม่ทุกๆ 1 วินาที เฉพาะคนดู (Viewer) เท่านั้น
         setInterval(() => {
